@@ -1,39 +1,51 @@
 #!/usr/bin/python3
-"""script for use in getting all states from sql db
 """
-import MySQLdb
-import sys
+    Script to get all cities of a specific state
+    from the database hbtn_0e_0_usa
 
+    ARGUMENTS :
+            mysql username
+            mysql password
+            database name
+            state_name
+    SORTED BY :
+        ASC states.id
+"""
 
 if __name__ == '__main__':
-    args = sys.argv
-    if len(args) < 5:
-        print("Usage: {} username password db_name state_name".format(args[0]))
-        exit(1)
+    import MySQLdb
+    import sys
 
-    # connect to database and set up user input variables
-    username = args[1]
-    password = args[2]
-    data = args[3]
-    statename = args[4]
-    db = MySQLdb.connect(host='localhost', user=username,
-                         passwd=password, db=data,
-                         port=3306)
+    # Recover argument from user
+    user = sys.argv[1]
+    pswd = sys.argv[2]
+    db_name = sys.argv[3]
+    state_name = sys.argv[4]
+
+    # connect database
+    db = MySQLdb.connect(host='localhost', user=user,
+                         passwd=pswd, db=db_name, port=3306)
+
+    # create cursor
     cur = db.cursor()
-    # execute sql join statement to gather states and cities
-    num_rows = cur.execute('''
-        SELECT cities.id, cities.name, states.name
-        FROM cities INNER JOIN states
-        ON cities.state_id=states.id
-        ORDER BY cities.id ASC
-        ''')
-    rows = cur.fetchall()
-    # get cities from all rows matching state name
-    cities = [row[1] for row in rows if statename == row[2]]
-    num_cities = len(cities)
-    # print cities out using custom ends to format output
-    for i, city in enumerate(cities):
-        if i == num_cities - 1:
-            print(city)
-        else:
-            print(city, end=", ")
+
+    # executing MySQL Queries in Python
+    querry = """SELECT cities.name FROM cities \
+            LEFT JOIN states ON states.id = cities.state_id\
+            WHERE states.name = %s\
+            ORDER BY cities.id ASC"""
+    cur.execute(querry, (state_name,))
+
+    # construct string response
+    # cut tuple, add sep
+    all_cities = cur.fetchall()
+    result = ""
+    sep = ""
+    for cities in all_cities:
+        result = result + sep + cities[0]
+        sep = ", "
+    print(result)
+
+    # close cursor & db
+    cur.close()
+    db.close()

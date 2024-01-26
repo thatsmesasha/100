@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 """
-    Script to delate State object with name
-     containing letter a to database hbtn_0e_0_usa
+    Script to add State object "California"
+    with City "San Francisco"
+    to database hbtn_0e_0_usa
 
     ARGUMENTS :
             mysql username = user
@@ -13,7 +14,8 @@
 import sys
 from sqlalchemy import (create_engine)
 from sqlalchemy.orm import sessionmaker
-from model_state import Base, State
+from relationship_city import City
+from relationship_state import Base, State
 
 if __name__ == "__main__":
     # Recover argument from user
@@ -33,12 +35,14 @@ if __name__ == "__main__":
     Base.metadata.create_all(engine)
 
     # create session to save in bd
-    Session = sessionmaker(bind=engine)
-    session = Session()
+    session = sessionmaker(bind=engine)()
 
-    # delete object with name containing letter a
-    session.query(State).filter(State.name.like('%a%'))\
-        .delete(synchronize_session=False)
+    # create state and city
+    new_state = State(name='California')
+    new_city = City(name='San Francisco')
+    # link new state and new city + save session
+    new_state.cities.append(new_city)
+    session.add(new_state)
     session.commit()
 
     session.close()

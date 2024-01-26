@@ -1,29 +1,50 @@
 #!/usr/bin/python3
-"""script to list all state objects using sqlalchemy
 """
-from model_state import Base, State
+    Script to list State contain letter a from database hbtn_0e_0_usa
 
-from sqlalchemy.orm import sessionmaker
+    ARGUMENTS :
+            mysql username = user
+            mysql password = pswd
+            database name = db_name
+            state_name_to_search = search_name
 
-from sqlalchemy import (create_engine)
+"""
 
 import sys
+from sqlalchemy import (create_engine)
+from sqlalchemy.orm import sessionmaker
+from model_state import Base, State
 
+if __name__ == "__main__":
+    # Recover argument from user
+    user = sys.argv[1]
+    pswd = sys.argv[2]
+    db_name = sys.argv[3]
+    search_name = sys.argv[4]
 
-if __name__ == '__main__':
-    engine = create_engine('mysql+mysqldb://{}:{}@localhost/{}'
-                           .format(sys.argv[1], sys.argv[2], sys.argv[3]))
-    state_name = sys.argv[4]
-    # create custom session object class from database engine
+    # create bd
+    engine = create_engine(
+        'mysql+mysqldb://{}:{}@localhost/{}'
+        .format(user,
+                pswd,
+                db_name,
+                search_name),
+        pool_pre_ping=True
+    )
+    # function to create all tables in the bd engine
+    Base.metadata.create_all(engine)
+
+    # create session to save in bd
     Session = sessionmaker(bind=engine)
-    # create instance of new custom session class
     session = Session()
-    # find states matching state_name
-    states = session.query(State)\
-                    .filter(State.name == state_name)\
-                    .order_by(State.id)
-    if (states is not None and states.count() > 0):
-        for state in states:
-            print('{}'.format(state.id))
+
+    # query + construct string response
+    # if no answer print Not found
+    query = session.query(State)\
+        .filter(State.name == search_name).first()
+    if query is not None:
+        print(query.id)
     else:
-        print('Not found')
+        print("Not found")
+
+    session.close()

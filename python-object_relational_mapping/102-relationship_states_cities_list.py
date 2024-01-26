@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """
-    Script to delate State object with name
-     containing letter a to database hbtn_0e_0_usa
+    Script to list all City, and corresponding State
+    object in database hbtn_0e_0_usa
 
     ARGUMENTS :
             mysql username = user
@@ -13,7 +13,9 @@
 import sys
 from sqlalchemy import (create_engine)
 from sqlalchemy.orm import sessionmaker
-from model_state import Base, State
+from relationship_city import City
+from relationship_state import State
+
 
 if __name__ == "__main__":
     # Recover argument from user
@@ -29,16 +31,15 @@ if __name__ == "__main__":
                 db_name),
         pool_pre_ping=True
     )
-    # function to create all tables in the bd engine
-    Base.metadata.create_all(engine)
 
     # create session to save in bd
-    Session = sessionmaker(bind=engine)
-    session = Session()
+    session = sessionmaker(bind=engine)()
 
-    # delete object with name containing letter a
-    session.query(State).filter(State.name.like('%a%'))\
-        .delete(synchronize_session=False)
-    session.commit()
+    # query : table State with all State by asc order
+    query = session.query(State).order_by(State.id.asc())
+    # each city id + name and foreign key to recover state name
+    for state in query:
+        for city in state.cities:
+            print('{}: {} -> {}'.format(city.id, city.name, state.name))
 
     session.close()

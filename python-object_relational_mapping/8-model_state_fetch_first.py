@@ -1,24 +1,47 @@
 #!/usr/bin/python3
-"""script to list all state objects using sqlalchemy
 """
-from model_state import Base, State
+    Script to list the first State object from database hbtn_0e_0_usa
 
-from sqlalchemy.orm import sessionmaker
-
-from sqlalchemy import (create_engine)
+    ARGUMENTS :
+            mysql username = user
+            mysql password = pswd
+            database name = db_name
+    SORTED BY :
+        ASC states.id
+"""
 
 import sys
+from sqlalchemy import (create_engine)
+from sqlalchemy.orm import sessionmaker
+from model_state import Base, State
 
+if __name__ == "__main__":
+    # Recover argument from user
+    user = sys.argv[1]
+    pswd = sys.argv[2]
+    db_name = sys.argv[3]
 
-if __name__ == '__main__':
-    engine = create_engine('mysql+mysqldb://{}:{}@localhost/{}'
-                           .format(sys.argv[1], sys.argv[2], sys.argv[3]))
-    # create custom session object class from database engine
+    # create bd
+    engine = create_engine(
+        'mysql+mysqldb://{}:{}@localhost/{}'
+        .format(user,
+                pswd,
+                db_name),
+        pool_pre_ping=True
+    )
+    # function to create all tables in the bd engine
+    Base.metadata.create_all(engine)
+
+    # create session to save in bd
     Session = sessionmaker(bind=engine)
-    # create instance of new custom session class
     session = Session()
-    state = session.query(State).order_by(State.id).first()
-    if (state is not None):
-        print('{}: {}'.format(state.id, state.name))
+
+    # query + construct string response
+    # if no answer print Nothing
+    query = session.query(State).first()
+    if query is not None:
+        print(str(query.id) + ": " + query.name)
     else:
         print('Nothing')
+
+    session.close()

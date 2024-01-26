@@ -1,28 +1,43 @@
 #!/usr/bin/python3
-"""script for use in getting all states from sql db
 """
-import MySQLdb
-import sys
+    Script to get all cities from the database hbtn_0e_0_usa
 
+    ARGUMENTS :
+            mysql username
+            mysql password
+            database name
+    SORTED BY :
+        ASC states.id
+"""
 
 if __name__ == '__main__':
-    args = sys.argv
-    if len(args) < 4:
-        print("Usage: {} username password db_name".format(args[0]))
-        exit(1)
-    username = args[1]
-    password = args[2]
-    data = args[3]
-    db = MySQLdb.connect(host='localhost', user=username,
-                         passwd=password, db=data,
-                         port=3306)
+    import MySQLdb
+    import sys
+
+    # Recover argument from user
+    user = sys.argv[1]
+    pswd = sys.argv[2]
+    db_name = sys.argv[3]
+
+    # connect database
+    db = MySQLdb.connect(host='localhost', user=user,
+                         passwd=pswd, db=db_name, port=3306)
+
+    # create cursor
     cur = db.cursor()
-    num_rows = cur.execute('''
-        SELECT cities.id, cities.name, states.name
-        FROM cities INNER JOIN states
-        ON cities.state_id=states.id
-        ORDER BY cities.id ASC
-        ''')
-    rows = cur.fetchall()
-    for row in rows:
-        print(row)
+
+    # executing MySQL Queries in Python
+    querry = """SELECT cities.id, cities.name, states.name \
+            FROM cities \
+            LEFT JOIN states ON states.id = cities.state_id\
+            ORDER BY cities.id ASC"""
+    cur.execute(querry)
+
+    # display
+    all_cities = cur.fetchall()
+    for cities in all_cities:
+        print(cities)
+
+    # close cursor & db
+    cur.close()
+    db.close()

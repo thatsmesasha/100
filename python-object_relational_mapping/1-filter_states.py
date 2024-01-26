@@ -1,24 +1,37 @@
 #!/usr/bin/python3
-"""script for use in getting all states from sql db
 """
-import MySQLdb
-import sys
+    Script to get all states from the database hbtn_0e_0_usa
+    with name starting with N
 
+    ARGUMENTS :
+            mysql username
+            mysql password
+            database name
+    SORTED BY :
+        ASC states.id
+"""
 
 if __name__ == '__main__':
-    args = sys.argv
-    username = args[1]
-    password = args[2]
-    data = args[3]
-    db = MySQLdb.connect(host='localhost', user=username,
-                         passwd=password, db=data,
-                         port=3306)
+    import MySQLdb
+    import sys
+
+    # Recover argument from user
+    user = sys.argv[1]
+    pswd = sys.argv[2]
+    db_name = sys.argv[3]
+
+    # connect database
+    db = MySQLdb.connect(host='localhost', user=user,
+                         passwd=pswd, db=db_name, port=3306)
+
+    # create cursor
     cur = db.cursor()
-    num_rows = cur.execute('''
-            SELECT * FROM states
-            WHERE states.name LIKE 'N%'
-            ORDER BY states.id
-            ''')
-    rows = cur.fetchall()
-    for row in rows:
+
+    # executing MySQL Queries in Python
+    cur.execute("SELECT * FROM states WHERE states.name \
+                LIKE BINARY 'N%' ORDER BY states.id ASC")
+
+    # display
+    all_statesN = cur.fetchall()
+    for row in all_statesN:
         print(row)

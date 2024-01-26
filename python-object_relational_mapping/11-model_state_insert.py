@@ -1,24 +1,46 @@
 #!/usr/bin/python3
-"""script to list all state objects using sqlalchemy
 """
-from model_state import Base, State
+    Script to add State object "Louisiana" to database hbtn_0e_0_usa
 
-from sqlalchemy.orm import sessionmaker
+    ARGUMENTS :
+            mysql username = user
+            mysql password = pswd
+            database name = db_name
 
-from sqlalchemy import (create_engine)
+"""
 
 import sys
+from sqlalchemy import (create_engine)
+from sqlalchemy.orm import sessionmaker
+from model_state import Base, State
 
+if __name__ == "__main__":
+    # Recover argument from user
+    user = sys.argv[1]
+    pswd = sys.argv[2]
+    db_name = sys.argv[3]
 
-if __name__ == '__main__':
-    engine = create_engine('mysql+mysqldb://{}:{}@localhost/{}'
-                           .format(sys.argv[1], sys.argv[2], sys.argv[3]))
-    # create custom session object class from database engine
+    # create bd
+    engine = create_engine(
+        'mysql+mysqldb://{}:{}@localhost/{}'
+        .format(user,
+                pswd,
+                db_name),
+        pool_pre_ping=True
+    )
+    # function to create all tables in the bd engine
+    Base.metadata.create_all(engine)
+
+    # create session to save in bd
     Session = sessionmaker(bind=engine)
-    # create instance of new custom session class
     session = Session()
-    new_state = State()
-    new_state.name = 'Louisiana'
-    session.add(new_state)
+
+    # construct object + add to session
+    L_state = State(name="Louisiana")
+    session.add(L_state)
     session.commit()
-    print(new_state.id)
+
+    # print states.id after creation
+    print(L_state.id)
+
+    session.close()
