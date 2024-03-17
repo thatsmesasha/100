@@ -25,7 +25,7 @@ def transition_layer(X, nb_filters, compression):
     initializer = K.initializers.HeNormal()
 
     # define number of filter
-    num_filters = nb_filters * compression
+    num_filters = int(nb_filters * compression)
 
     batchN = K.layers.BatchNormalization()(X)
     relu = K.layers.Activation(activation='relu')(batchN)
